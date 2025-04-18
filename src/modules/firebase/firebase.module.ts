@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { firestore } from './firebase.config';
+import { firestore, auth } from './firebase.config';
 
 @Module({
   imports: [],
@@ -9,7 +9,11 @@ import { firestore } from './firebase.config';
       provide: 'FIRESTORE',
       useValue: firestore,
     },
+    {
+      provide: 'FIREBASE_AUTH',
+      useValue: auth,
+    },
   ],
-  exports: ['FIRESTORE'],
+  exports: ['FIRESTORE', 'FIREBASE_AUTH'],
 })
 export class FirebaseModule {}
