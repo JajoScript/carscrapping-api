@@ -4,7 +4,7 @@
 /build
 
 # Firebase
-serviceAccountKey.json
+service_account.json
 
 # Logs
 logs
