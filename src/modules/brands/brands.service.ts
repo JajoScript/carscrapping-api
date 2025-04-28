@@ -1,5 +1,10 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { Firestore } from 'firebase-admin/firestore';
+import {
+  DocumentReference,
+  DocumentSnapshot,
+  Firestore,
+} from 'firebase-admin/firestore';
+import { CreateBrandDTO } from './DTOs';
 
 @Injectable()
 export class BrandsService {
@@ -19,5 +24,18 @@ export class BrandsService {
 
     const brands = snapshot.docs.map((doc) => doc.data());
     return brands;
+  }
+
+  async createBrand(brand: CreateBrandDTO): Promise<any> {
+    const docRef: DocumentReference = await this.firestore
+      .collection('brands')
+      .add(brand);
+    await docRef.set({ brandID: docRef.id }, { merge: true });
+
+    const docSnap: DocumentSnapshot = await docRef.get();
+    const newBrand = docSnap.data();
+
+    console.log('Brand created with ID:', docRef.id);
+    return newBrand;
   }
 }

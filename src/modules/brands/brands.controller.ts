@@ -1,6 +1,16 @@
-import { Controller, Get, HttpStatus, Logger, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpStatus,
+  Logger,
+  Post,
+  Res,
+  ValidationPipe,
+} from '@nestjs/common';
 import { BrandsService } from './brands.service';
 import { Response } from 'express';
+import { CreateBrandDTO } from './DTOs';
 
 @Controller('brands')
 export class BrandsController {
@@ -18,6 +28,23 @@ export class BrandsController {
       status: HttpStatus.OK,
       message: 'Brands fetched successfully',
       brands,
+    });
+    return;
+  }
+
+  @Post('/create')
+  async createBrand(
+    @Body(new ValidationPipe()) body: CreateBrandDTO,
+    @Res() res: Response,
+  ) {
+    this.logger.log('Create brand');
+
+    const brand = await this.service.createBrand(body);
+
+    res.status(HttpStatus.CREATED).send({
+      status: HttpStatus.CREATED,
+      message: 'Brand created successfully',
+      brand,
     });
     return;
   }
