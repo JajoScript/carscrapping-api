@@ -11,9 +11,10 @@ export class AuthService {
   // *-- Methods.
   async signup(payload: SignupDTO) {
     // 1. Verificar que el usuario no exista previamente.
-    const prev: UserRecord = await this.auth.getUserByEmail(payload.email);
+    // TODO: Revisar esta wea...
+    // const prev: UserRecord = await this.auth.getUserByEmail(payload.email);
 
-    if (prev) throw new Error('User already exists');
+    // if (prev) throw new Error('User already exists');
 
     // 2. Crear el usuario.
     const user: UserRecord = await this.auth.createUser({
