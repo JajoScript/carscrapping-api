@@ -39,4 +39,18 @@ export class CarsController {
     });
     return;
   }
+
+  @Get('migrate')
+  async migrateCars(@Res() res: Response) {
+    this.logger.log('Migrating cars');
+
+    const result = await this.service.migration();
+
+    res.status(HttpStatus.OK).send({
+      status: HttpStatus.OK,
+      message: 'Cars migrated successfully',
+      data: result,
+    });
+    return;
+  }
 }

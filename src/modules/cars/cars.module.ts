@@ -13,6 +13,9 @@ import { BrandsController } from '../brands/brands.controller';
 })
 export class CarsModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(FirebaseAuthMiddleware).forRoutes(BrandsController);
+    consumer
+      .apply(FirebaseAuthMiddleware)
+      .exclude('migrate')
+      .forRoutes(BrandsController);
   }
 }

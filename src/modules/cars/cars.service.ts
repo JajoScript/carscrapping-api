@@ -12,14 +12,25 @@ export class CarsService {
     const take: number = 25;
     const skip: number = (page - 1) * take;
 
-    const cars = await this.firestore
+    const brandSnap = await this.firestore
+      .collection('brands')
+      .where('name', '==', brand)
+      .get();
+
+    if (brandSnap.empty) {
+      this.logger.warn(`No cars found for brand: ${brand}`);
+      return [];
+    }
+
+    const brandDoc = brandSnap.docs[0];
+    const carsSnap = await brandDoc.ref
       .collection('autos')
-      .where('marca', '==', brand)
+      .orderBy('model')
       .offset(skip)
       .limit(take)
       .get();
 
-    return cars.docs.map((doc) => doc.data());
+    return carsSnap.docs.map((doc) => doc.data());
   }
 
   async getTotalCarsByBrand(brand: string): Promise<number> {
@@ -36,5 +47,51 @@ export class CarsService {
     const take: number = 25;
 
     return Math.ceil(totalCars / take);
+  }
+
+  async migration() {
+    const autosSnap = await this.firestore.collection('autos').get();
+
+    for (const doc of autosSnap.docs) {
+      const autoData = doc.data();
+      const brandName = autoData.marca?.trim();
+
+      if (!brandName) {
+        console.warn(`Auto sin marca: ID ${doc.id}`);
+        continue;
+      }
+
+      // Buscar documento de la marca
+      const brandSnap = await this.firestore
+        .collection('brands')
+        .where('name', '==', brandName)
+        .limit(1)
+        .get();
+
+      if (brandSnap.empty) {
+        console.warn(
+          `Marca no encontrada para auto ID ${doc.id}: ${brandName}`,
+        );
+        continue;
+      }
+
+      const brandDoc = brandSnap.docs[0];
+      const brandDocRef = brandDoc.ref;
+
+      // Copiar auto como subcolección de la marca
+      const payload = {
+        carID: doc.id,
+        model: autoData.modelo,
+        description: autoData.extras,
+        price: autoData.precio,
+        brandID: brandDoc.id,
+        photoURL: '',
+      };
+      await brandDocRef.collection('autos').doc(doc.id).set(payload);
+
+      console.log(`Auto ${doc.id} migrado a brand ${brandName}`);
+    }
+
+    console.log('Migración completada.');
   }
 }
