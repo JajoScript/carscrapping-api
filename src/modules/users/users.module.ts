@@ -1,8 +1,9 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { FirebaseModule } from '@/modules/firebase/firebase.module';
 
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
+import { FirebaseAuthMiddleware } from '@/middlewares';
 
 @Module({
   imports: [FirebaseModule],
@@ -10,4 +11,8 @@ import { UsersService } from './users.service';
   providers: [UsersService],
   exports: [UsersService],
 })
-export class UsersModule {}
+export class UsersModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(FirebaseAuthMiddleware).forRoutes(UsersController);
+  }
+}
