@@ -2,11 +2,14 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger } from '@nestjs/common';
 import { env } from '@/config';
+import { APIErrorFilter } from './filters';
 
 async function bootstrap() {
   const logger = new Logger('main');
   const app = await NestFactory.create(AppModule);
+
   app.setGlobalPrefix('api');
+  app.useGlobalFilters(new APIErrorFilter());
   app.enableCors({
     origin: '*',
   });

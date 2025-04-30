@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
-import { SigninDTO, SignupDTO } from './DTOs';
+import { SignupDTO } from './DTOs';
 
 @Controller('auth')
 export class AuthController {
@@ -29,21 +29,6 @@ export class AuthController {
       status: HttpStatus.CREATED,
       message: 'User created successfully',
       data: user,
-    });
-    return;
-  }
-
-  @Post('/signin')
-  async signin(
-    @Body(new ValidationPipe()) body: SigninDTO,
-    @Res() res: Response,
-  ) {
-    await this.service.signin(body);
-
-    res.status(HttpStatus.OK).send({
-      status: HttpStatus.OK,
-      message: 'User signed in successfully',
-      data: null,
     });
     return;
   }
