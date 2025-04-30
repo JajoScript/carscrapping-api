@@ -13,6 +13,15 @@ export class BrandsService {
   constructor(@Inject('FIRESTORE') private readonly firestore: Firestore) {}
 
   // *-- Methods
+  async getPages(): Promise<number> {
+    const take: number = 25;
+    const snapshot = await this.firestore.collection('brands').get();
+    const total: number = snapshot.docs.length;
+    const pages: number = Math.ceil(total / take);
+
+    return pages;
+  }
+
   async getBrands(page: number = 1) {
     const take: number = 25;
     const skip: number = (page - 1) * take;

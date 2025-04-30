@@ -4,7 +4,9 @@ import {
   Get,
   HttpStatus,
   Logger,
+  ParseIntPipe,
   Post,
+  Query,
   Res,
   ValidationPipe,
 } from '@nestjs/common';
@@ -20,14 +22,20 @@ export class BrandsController {
 
   // *-- Endpoints
   @Get('/')
-  async getBrands(@Res() res: Response) {
-    this.logger.log('Fetching all brands');
-    const brands = await this.service.getBrands();
+  async getBrands(
+    @Query('page', new ParseIntPipe({ optional: true })) page: number,
+    @Res() res: Response,
+  ) {
+    const actual: number = page ?? 1;
+    const pages: number = await this.service.getPages();
+    const brands = await this.service.getBrands(actual);
 
     res.status(HttpStatus.OK).send({
       status: HttpStatus.OK,
       message: 'Brands fetched successfully',
       brands,
+      page: actual,
+      pages,
     });
     return;
   }
