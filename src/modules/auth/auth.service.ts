@@ -1,6 +1,11 @@
 import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
 import { SignupDTO } from './DTOs';
-import { Auth, FirebaseAuthError, UserRecord } from 'firebase-admin/auth';
+import {
+  Auth,
+  DecodedIdToken,
+  FirebaseAuthError,
+  UserRecord,
+} from 'firebase-admin/auth';
 import { UsersService } from '@/modules/users/users.service';
 import APIError from '@/errors';
 
@@ -41,8 +46,9 @@ export class AuthService {
   async verifyToken(token: string): Promise<boolean> {
     try {
       const isValid: boolean = await this.auth
-        .verifyIdToken(token)
-        .then(() => {
+        .verifyIdToken(token, true)
+        .then((decoded: DecodedIdToken) => {
+          this.logger.debug(decoded);
           return true;
         })
         .catch((err: FirebaseAuthError) => {
@@ -50,10 +56,25 @@ export class AuthService {
             return false;
           }
 
+          if (err.code === 'auth/id-token-revoked') {
+            return false;
+          }
+
           throw err;
         });
 
       return isValid;
+    } catch (err: unknown) {
+      this.logger.error(err);
+      throw err;
+    }
+  }
+
+  async singout(uid: string): Promise<void> {
+    try {
+      await this.auth.revokeRefreshTokens(uid);
+
+      return;
     } catch (err: unknown) {
       this.logger.error(err);
       throw err;

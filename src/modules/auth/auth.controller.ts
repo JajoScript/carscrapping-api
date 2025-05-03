@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
-import { SignupDTO, VerifyTokenDTO } from './DTOs';
+import { SignoutDTO, SignupDTO, VerifyTokenDTO } from './DTOs';
 
 @Controller('auth')
 export class AuthController {
@@ -44,6 +44,20 @@ export class AuthController {
       status: HttpStatus.CREATED,
       message: 'Token verify successfully',
       isValid: result,
+    });
+    return;
+  }
+
+  @Post('/signout')
+  async signout(
+    @Body(new ValidationPipe()) body: SignoutDTO,
+    @Res() res: Response,
+  ) {
+    await this.service.singout(body.uid);
+
+    res.status(HttpStatus.CREATED).send({
+      status: HttpStatus.CREATED,
+      message: 'signout successfully',
     });
     return;
   }
