@@ -1,6 +1,6 @@
 import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
 import { SignupDTO } from './DTOs';
-import { Auth, UserRecord } from 'firebase-admin/auth';
+import { Auth, FirebaseAuthError, UserRecord } from 'firebase-admin/auth';
 import { UsersService } from '@/modules/users/users.service';
 import APIError from '@/errors';
 
@@ -36,5 +36,27 @@ export class AuthService {
     });
 
     return user;
+  }
+
+  async verifyToken(token: string): Promise<boolean> {
+    try {
+      const isValid: boolean = await this.auth
+        .verifyIdToken(token)
+        .then(() => {
+          return true;
+        })
+        .catch((err: FirebaseAuthError) => {
+          if (err.code === 'auth/id-token-expired') {
+            return false;
+          }
+
+          throw err;
+        });
+
+      return isValid;
+    } catch (err: unknown) {
+      this.logger.error(err);
+      throw err;
+    }
   }
 }
